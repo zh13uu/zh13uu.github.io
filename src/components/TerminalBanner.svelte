@@ -6,10 +6,10 @@ export let steps = [
 	{ type: "cmd", text: "ls" },
 	{ type: "result", text: "welcome" },
 	{ type: "cmd", text: "./welcome" },
-	{ 
-		type: "result", 
-		text: "Hey there! Welcome to my page \n Where Innovation Meets Excellence \n Let's chill and explore together 😎", 
-		special: true 
+	{
+		type: "result",
+		text: "Hey there! Welcome to my page \n Where Innovation Meets Excellence \n Let's chill and explore together 😎",
+		special: true,
 	},
 ];
 
@@ -99,10 +99,10 @@ async function typeTerminal() {
 
 async function typeSpecialResult(text) {
 	// Tách text thành các dòng
-	const lines = text.split('\n');
+	const lines = text.split("\n");
 	specialLines = [];
 	currentSpecialLine = 0;
-	
+
 	// Thêm container cho special result
 	displayedLines = [
 		...displayedLines,
@@ -139,7 +139,7 @@ async function typeSpecialResult(text) {
 		// Hoàn thành dòng hiện tại
 		specialLines = [...specialLines, lines[lineIndex]];
 		isTypingSpecial = false;
-		
+
 		// Delay trước dòng tiếp theo
 		await new Promise((r) => setTimeout(r, 400));
 	}
