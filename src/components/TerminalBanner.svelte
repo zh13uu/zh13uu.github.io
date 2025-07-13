@@ -1,94 +1,97 @@
 <script>
-  // Danh sách các bước: mỗi bước là { type: 'cmd' | 'result', text: string }
-  export let steps = [
-    { type: 'cmd', text: 'id' },
-    { type: 'result', text: 'root at here :)' },
-    { type: 'cmd', text: 'ls' },
-    { type: 'result', text: 'welcome' },
-    { type: 'cmd', text: './welcome' },
-    { type: 'result', text: 'Enjoy with me' },
-  ];
+// Danh sách các bước: mỗi bước là { type: 'cmd' | 'result', text: string }
+export let steps = [
+	{ type: "cmd", text: "id" },
+	{ type: "result", text: "root at here :)" },
+	{ type: "cmd", text: "ls" },
+	{ type: "result", text: "welcome" },
+	{ type: "cmd", text: "./welcome" },
+	{ type: "result", text: "Enjoy with me" },
+];
 
-  let displayedLines = [];
-  let typing = '';
-  let showCursor = true;
-  let currentTime = new Date().toLocaleString();
-  let isTyping = false;
-  let stepIndex = 0;
+let displayedLines = [];
+let typing = "";
+let showCursor = true;
+let currentTime = new Date().toLocaleString();
+let isTyping = false;
+let stepIndex = 0;
 
-  // Thêm biến cho từng ký tự typing
-  $: typingChars = typing.split("");
+// Thêm biến cho từng ký tự typing
+$: typingChars = typing.split("");
 
-  async function typeTerminal() {
-    // Delay khởi tạo cho smooth hơn
-    await new Promise(r => setTimeout(r, 1500));
-    
-    for (let i = 0; i < steps.length; i++) {
-      if (steps[i].type === 'cmd') {
-        typing = '';
-        isTyping = true;
-        showCursor = true;
-        
-        // Delay êm hơn trước khi bắt đầu gõ
-        await new Promise(r => setTimeout(r, 600));
-        
-        // Gõ từng ký tự với hiệu ứng từ trái sang phải - mượt hơn
-        for (let j = 0; j < steps[i].text.length; j++) {
-          typing = steps[i].text.substring(0, j + 1);
-          
-          // Tốc độ gõ mượt hơn và tự nhiên hơn (80-200ms)
-          let delay = 80 + Math.random() * 120;
-          
-          // Thêm hiệu ứng ngừng dài hơn tại space và dấu câu
-          if (steps[i].text[j] === ' ') {
-            delay += 150; // Dừng lâu hơn ở space
-            await new Promise(r => setTimeout(r, delay));
-            continue;
-          } else if (['.', '/', '-', '_'].includes(steps[i].text[j])) {
-            delay += 100; // Dừng lâu hơn ở dấu câu
-            await new Promise(r => setTimeout(r, delay));
-            continue;
-          }
-          
-          await new Promise(r => setTimeout(r, delay));
-        }
-        
-        // Dừng lại lâu hơn sau khi gõ xong để tạo cảm giác tự nhiên
-        await new Promise(r => setTimeout(r, 600));
-        
-        // Gõ xong thì tắt cursor và isTyping trước khi push vào displayedLines
-        isTyping = false;
-        showCursor = false;
-        
-        // Push dòng lệnh vào displayedLines
-        displayedLines = [...displayedLines, { type: 'cmd', text: typing }];
-        typing = '';
-        
-        // Delay nhẹ nhàng trước khi hiện kết quả
-        await new Promise(r => setTimeout(r, 300));
-        
-      } else {
-        // Kết quả hiện ra với hiệu ứng slide in mượt mà
-        displayedLines = [...displayedLines, { type: 'result', text: steps[i].text }];
-        
-        // Delay êm hơn trước lệnh tiếp theo
-        await new Promise(r => setTimeout(r, 1000 + Math.random() * 400));
-      }
-      stepIndex = i + 1;
-    }
-    
-    // Sau khi hoàn thành, restart animation
-    // await new Promise(r => setTimeout(r, 3000));
-    // restartAnimation();
-  }
+async function typeTerminal() {
+	// Delay khởi tạo cho smooth hơn
+	await new Promise((r) => setTimeout(r, 1500));
 
-  function updateTime() {
-    currentTime = new Date().toLocaleString();
-  }
+	for (let i = 0; i < steps.length; i++) {
+		if (steps[i].type === "cmd") {
+			typing = "";
+			isTyping = true;
+			showCursor = true;
 
-  // Bắt đầu animation
-  typeTerminal();
-  setInterval(updateTime, 1000);
+			// Delay êm hơn trước khi bắt đầu gõ
+			await new Promise((r) => setTimeout(r, 600));
+
+			// Gõ từng ký tự với hiệu ứng từ trái sang phải - mượt hơn
+			for (let j = 0; j < steps[i].text.length; j++) {
+				typing = steps[i].text.substring(0, j + 1);
+
+				// Tốc độ gõ mượt hơn và tự nhiên hơn (80-200ms)
+				let delay = 80 + Math.random() * 120;
+
+				// Thêm hiệu ứng ngừng dài hơn tại space và dấu câu
+				if (steps[i].text[j] === " ") {
+					delay += 150; // Dừng lâu hơn ở space
+					await new Promise((r) => setTimeout(r, delay));
+					continue;
+				}
+				if ([".", "/", "-", "_"].includes(steps[i].text[j])) {
+					delay += 100; // Dừng lâu hơn ở dấu câu
+					await new Promise((r) => setTimeout(r, delay));
+					continue;
+				}
+
+				await new Promise((r) => setTimeout(r, delay));
+			}
+
+			// Dừng lại lâu hơn sau khi gõ xong để tạo cảm giác tự nhiên
+			await new Promise((r) => setTimeout(r, 600));
+
+			// Gõ xong thì tắt cursor và isTyping trước khi push vào displayedLines
+			isTyping = false;
+			showCursor = false;
+
+			// Push dòng lệnh vào displayedLines
+			displayedLines = [...displayedLines, { type: "cmd", text: typing }];
+			typing = "";
+
+			// Delay nhẹ nhàng trước khi hiện kết quả
+			await new Promise((r) => setTimeout(r, 300));
+		} else {
+			// Kết quả hiện ra với hiệu ứng slide in mượt mà
+			displayedLines = [
+				...displayedLines,
+				{ type: "result", text: steps[i].text },
+			];
+
+			// Delay êm hơn trước lệnh tiếp theo
+			await new Promise((r) => setTimeout(r, 1000 + Math.random() * 400));
+		}
+		stepIndex = i + 1;
+	}
+
+	// Sau khi hoàn thành, restart animation
+	// await new Promise(r => setTimeout(r, 3000));
+	// restartAnimation();
+}
+
+function updateTime() {
+	currentTime = new Date().toLocaleString();
+}
+
+// Bắt đầu animation
+typeTerminal();
+setInterval(updateTime, 1000);
 </script>
 
 <style>
