@@ -177,7 +177,7 @@ print(f"password: {password}")
 # password: LetTheGamesBegin2025
 ```
 
-![image](https://hackmd.io/_uploads/HJMnHvfMgg.png)
+![image](./image/nahamcon/1.png)
 
 `flag: flag{c419dfe3a0a621edc0150a133bb7a34c}`
 
