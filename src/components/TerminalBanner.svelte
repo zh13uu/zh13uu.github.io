@@ -6,7 +6,11 @@ export let steps = [
 	{ type: "cmd", text: "ls" },
 	{ type: "result", text: "welcome" },
 	{ type: "cmd", text: "./welcome" },
-	{ type: "result", text: "Enjoy with me" },
+	{ 
+		type: "result", 
+		text: "Hey there! Welcome to my page \n Where Innovation Meets Excellence \n Let's chill and explore together 😎", 
+		special: true 
+	},
 ];
 
 let displayedLines = [];
@@ -16,8 +20,15 @@ let currentTime = new Date().toLocaleString();
 let isTyping = false;
 let stepIndex = 0;
 
+// Biến cho hiệu ứng typing từng dòng
+let specialLines = [];
+let currentSpecialLine = 0;
+let typingSpecialText = "";
+let isTypingSpecial = false;
+
 // Thêm biến cho từng ký tự typing
 $: typingChars = typing.split("");
+$: typingSpecialChars = typingSpecialText.split("");
 
 async function typeTerminal() {
 	// Delay khởi tạo cho smooth hơn
@@ -68,21 +79,70 @@ async function typeTerminal() {
 			// Delay nhẹ nhàng trước khi hiện kết quả
 			await new Promise((r) => setTimeout(r, 300));
 		} else {
-			// Kết quả hiện ra với hiệu ứng slide in mượt mà
-			displayedLines = [
-				...displayedLines,
-				{ type: "result", text: steps[i].text },
-			];
+			// Kiểm tra nếu là special result
+			if (steps[i].special) {
+				await typeSpecialResult(steps[i].text);
+			} else {
+				// Kết quả thường hiện ra với hiệu ứng slide in mượt mà
+				displayedLines = [
+					...displayedLines,
+					{ type: "result", text: steps[i].text, special: steps[i].special },
+				];
+			}
 
 			// Delay êm hơn trước lệnh tiếp theo
 			await new Promise((r) => setTimeout(r, 1000 + Math.random() * 400));
 		}
 		stepIndex = i + 1;
 	}
+}
 
-	// Sau khi hoàn thành, restart animation
-	// await new Promise(r => setTimeout(r, 3000));
-	// restartAnimation();
+async function typeSpecialResult(text) {
+	// Tách text thành các dòng
+	const lines = text.split('\n');
+	specialLines = [];
+	currentSpecialLine = 0;
+	
+	// Thêm container cho special result
+	displayedLines = [
+		...displayedLines,
+		{ type: "result", text: "", special: true, isContainer: true },
+	];
+
+	// Typing từng dòng
+	for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+		typingSpecialText = "";
+		isTypingSpecial = true;
+		currentSpecialLine = lineIndex;
+
+		// Delay trước khi bắt đầu dòng mới
+		await new Promise((r) => setTimeout(r, 800));
+
+		// Gõ từng ký tự của dòng hiện tại
+		for (let charIndex = 0; charIndex < lines[lineIndex].length; charIndex++) {
+			typingSpecialText = lines[lineIndex].substring(0, charIndex + 1);
+
+			// Tốc độ typing mượt hơn cho special text
+			let delay = 60 + Math.random() * 80;
+
+			// Dừng lâu hơn tại emoji và space
+			if (lines[lineIndex][charIndex] === " ") {
+				delay += 100;
+			}
+			if (["🚀", "💫", "⚡"].includes(lines[lineIndex][charIndex])) {
+				delay += 200;
+			}
+
+			await new Promise((r) => setTimeout(r, delay));
+		}
+
+		// Hoàn thành dòng hiện tại
+		specialLines = [...specialLines, lines[lineIndex]];
+		isTypingSpecial = false;
+		
+		// Delay trước dòng tiếp theo
+		await new Promise((r) => setTimeout(r, 400));
+	}
 }
 
 function updateTime() {
@@ -251,7 +311,7 @@ setInterval(updateTime, 1000);
     font-family: 'JetBrains Mono', 'Fira Mono', monospace;
     display: flex;
     align-items: baseline;
-    min-height: 27px; /* Cố định chiều cao để tránh nhấp nháy */
+    min-height: 27px;
   }
   
   .terminal-line.fade-in {
@@ -276,7 +336,7 @@ setInterval(updateTime, 1000);
     text-shadow: 0 0 6px rgba(255, 107, 107, 0.4);
     font-family: inherit;
     white-space: nowrap;
-    flex-shrink: 0; /* Không cho phép co lại */
+    flex-shrink: 0;
   }
 
   .terminal-cmd {
@@ -291,7 +351,6 @@ setInterval(updateTime, 1000);
     overflow: hidden;
   }
 
-  /* Màu xanh lá cho command thực thi */
   .terminal-cmd.executable {
     color: #00ff64;
     text-shadow: 0 0 4px rgba(0, 255, 100, 0.4);
@@ -305,16 +364,152 @@ setInterval(updateTime, 1000);
     font-family: inherit;
     opacity: 0.9;
     flex: 1;
+    white-space: pre-line;
   }
 
-  /* Màu xanh lá cho file thực thi */
   .terminal-result.executable {
     color: #00ff64;
     text-shadow: 0 0 4px rgba(0, 255, 100, 0.4);
     font-weight: 500;
   }
 
-  /* Con trỏ nằm ngang */
+  /* Container cho special result */
+  .special-container {
+    color: #00ff64;
+    background: 
+      linear-gradient(135deg, rgba(13, 17, 23, 0.95) 0%, rgba(1, 4, 9, 0.98) 100%);
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1.8;
+    text-align: center;
+    display: block;
+    margin: 20px 0;
+    padding: 25px;
+    border: 1px solid rgba(0, 255, 100, 0.3);
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    animation: welcomePulse 3s ease-in-out infinite;
+    backdrop-filter: blur(10px);
+    box-shadow: 
+      0 8px 32px rgba(0, 255, 100, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .special-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      45deg,
+      rgba(0, 255, 100, 0.1) 0%,
+      rgba(0, 212, 255, 0.1) 25%,
+      rgba(255, 0, 110, 0.1) 50%,
+      rgba(131, 56, 236, 0.1) 75%,
+      rgba(0, 255, 100, 0.1) 100%
+    );
+    background-size: 400% 400%;
+    animation: gradientWave 4s ease-in-out infinite;
+    z-index: -1;
+  }
+
+  .special-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
+    animation: smoothShine 3s ease-in-out infinite;
+    z-index: 1;
+  }
+
+  .special-line {
+    display: block;
+    margin: 8px 0;
+    text-shadow: 
+      0 0 10px rgba(0, 255, 100, 0.8),
+      0 0 20px rgba(0, 255, 100, 0.6),
+      0 0 30px rgba(0, 255, 100, 0.4);
+    opacity: 0;
+    transform: translateY(10px);
+    animation: lineAppear 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+
+  @keyframes lineAppear {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .special-typing-line {
+    display: block;
+    margin: 8px 0;
+    text-shadow: 
+      0 0 10px rgba(0, 255, 100, 0.8),
+      0 0 20px rgba(0, 255, 100, 0.6),
+      0 0 30px rgba(0, 255, 100, 0.4);
+  }
+
+  @keyframes welcomePulse {
+    0%, 100% { 
+      transform: scale(1);
+      text-shadow: 
+        0 0 10px rgba(0, 255, 100, 0.8),
+        0 0 20px rgba(0, 255, 100, 0.6),
+        0 0 30px rgba(0, 255, 100, 0.4);
+      box-shadow: 
+        0 8px 32px rgba(0, 255, 100, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    50% { 
+      transform: scale(1.02);
+      text-shadow: 
+        0 0 15px rgba(0, 255, 100, 1),
+        0 0 25px rgba(0, 255, 100, 0.8),
+        0 0 35px rgba(0, 255, 100, 0.6);
+      box-shadow: 
+        0 12px 48px rgba(0, 255, 100, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+  }
+
+  @keyframes gradientWave {
+    0%, 100% { 
+      background-position: 0% 50%; 
+      opacity: 0.3;
+    }
+    50% { 
+      background-position: 100% 50%; 
+      opacity: 0.5;
+    }
+  }
+
+  @keyframes smoothShine {
+    0%, 100% { 
+      left: -100%; 
+      opacity: 0;
+    }
+    50% { 
+      left: 100%; 
+      opacity: 1;
+    }
+  }
+
   .cursor {
     display: inline-block;
     width: 12px;
@@ -415,7 +610,6 @@ setInterval(updateTime, 1000);
     scroll-behavior: smooth;
   }
 
-  /* Container cho command line để tránh layout shift */
   .cmd-container {
     display: flex;
     align-items: baseline;
@@ -423,14 +617,12 @@ setInterval(updateTime, 1000);
     min-height: 27px;
   }
 
-  /* Tối ưu hóa typing effect */
   .typing-container {
     display: flex;
     align-items: baseline;
     flex: 1;
   }
 
-  /* Hiệu ứng typing từ trái sang phải - mượt hơn */
   .typing-text {
     display: inline-block;
     overflow: hidden;
@@ -450,7 +642,6 @@ setInterval(updateTime, 1000);
     }
   }
 
-  /* Loại bỏ các hiệu ứng không cần thiết */
   .terminal-cmd {
     overflow: visible;
     white-space: nowrap;
@@ -473,6 +664,24 @@ setInterval(updateTime, 1000);
       transform: translateX(0) scale(1);
     }
   }
+
+  .typing-special-char {
+    display: inline;
+    opacity: 0;
+    transform: translateY(-2px) scale(0.9);
+    animation: slideInSpecialChar 0.12s cubic-bezier(.25,.46,.45,.94) forwards;
+  }
+  
+  @keyframes slideInSpecialChar {
+    0% {
+      opacity: 0;
+      transform: translateY(-2px) scale(0.9);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
 </style>
 
 <div class="terminal-container">
@@ -493,6 +702,22 @@ setInterval(updateTime, 1000);
             <div class="terminal-line">
               <span class="terminal-prompt">nd0@darknet:/# </span>
               <span class="terminal-cmd" class:executable={line.text === './welcome'}>{line.text}</span>
+            </div>
+          {:else if line.special && line.isContainer}
+            <div class="special-container">
+              {#each specialLines as completedLine, idx}
+                <div class="special-line" style="animation-delay: {idx * 0.1}s">
+                  {completedLine}
+                </div>
+              {/each}
+              {#if isTypingSpecial}
+                <div class="special-typing-line">
+                  {#each typingSpecialChars as char, idx}
+                    <span class="typing-special-char" style="animation-delay: {idx * 0.02}s">{char}</span>
+                  {/each}
+                  <span class="cursor"></span>
+                </div>
+              {/if}
             </div>
           {:else}
             <div class="terminal-line fade-in">
